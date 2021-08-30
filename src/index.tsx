@@ -13,8 +13,9 @@ import {
 
 let sandboxUri = 'https://48p1r2roz4.sse.codesandbox.io';
 let localUri = 'http://localhost:4000/graphql'
+let remoteUri = 'https://e188-203-221-38-254.ngrok.io'
 const client = new ApolloClient({
-  uri: localUri,
+  uri: remoteUri,
   cache: new InMemoryCache()
 });
 
