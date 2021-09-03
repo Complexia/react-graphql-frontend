@@ -119,7 +119,7 @@ const TotalSupply = ({ address }) => {
 }
 
 const EarliestPool = ({ address }) => {
-  const { loading, error, data } = useQuery(GET_TOTAL_SUPPLY, {
+  const { loading, error, data } = useQuery(GET_EARLIEST_POOL, {
     variables: { address },
   });
 
