@@ -9,10 +9,11 @@ import {
   gql
 } from "@apollo/client";
 import { render } from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 let sandboxUri = 'https://48p1r2roz4.sse.codesandbox.io';
 let localUri = 'http://localhost:4000/graphql'
-let remoteUri = 'https://e188-203-221-38-254.ngrok.io/graphql'
+let remoteUri = 'https://80c5-14-2-61-115.ngrok.io/graphql'
 const client = new ApolloClient({
   uri: remoteUri,
   cache: new InMemoryCache()
@@ -50,6 +51,24 @@ const GET_TXNS_HISTORY = gql`
       blockNumber
       topics
     }
+
+    
+  }
+`;
+
+const GET_PRICE_ETH = gql`
+  query GetPriceETH($address: String!) {
+    getPriceETH(address: $address)
+      
+
+    
+  }
+`;
+
+const GET_PRICE_USD = gql`
+  query GetPriceUSD($address: String!) {
+    getPriceUSD(address: $address)
+      
 
     
   }
@@ -106,6 +125,40 @@ const TxnsHistory = ({ address, block }) => {
     )
 }
 
+const PriceETH = ({ address }) => {
+  
+  const { loading, error, data } = useQuery(GET_PRICE_ETH, {
+    variables: { address },
+  });
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+    return (
+      <div>
+  
+        { JSON.stringify(data) }
+      </div>
+    )
+}
+
+const PriceUSD = ({ address }) => {
+  
+  const { loading, error, data } = useQuery(GET_PRICE_USD, {
+    variables: { address },
+  });
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+    return (
+      <div>
+  
+        { JSON.stringify(data) }
+      </div>
+    )
+}
+
 
 const ExchangeRates = () => {
 
@@ -146,17 +199,63 @@ export default function App() {
   return (
     <div className="App">
       <header className="App-header">
-	      Hello
-        <form onSubmit={ handleSubmit }>
-          <label>
-            Token address:
-              <input type="text" value={ address } name="address" onChange={e => setAddress(e.target.value)} />
-          </label>
-          <input type="submit" value="Search" />
-        </form>
-        <TokenName address = { address }/>
-        <TotalSupply address = { address } />
-        <TxnsHistory address = { address } block = { block } />
+	      
+        <div className="container">
+
+          <div className="row">
+
+            <div className="column">
+              <form onSubmit={ handleSubmit }>
+                <label>
+                  Token address:
+                    <input type="text" value={ address } name="address" onChange={e => setAddress(e.target.value)} />
+                </label>
+                <input type="submit" value="Search" />
+              </form>
+
+            </div>
+          </div>
+      </div>
+      <div className="container">
+          <div className="row">
+            <div className="column">
+              <div className="jumbotron bg-transparent">
+                <TokenName address = { address }/>
+              </div>
+            </div>
+            <div className="column">
+              <div className="jumbotron bg-transparent">
+                <TotalSupply address = { address } />
+              </div>
+            </div>
+            <div className="column">
+              <div className="jumbotron bg-transparent">
+                <TxnsHistory address = { address } block = { block } />
+              </div>
+            </div>
+
+            <div className="column">
+              <div className="jumbotron bg-transparent">
+                Price in USD
+                <PriceUSD address = { address } />
+              </div>
+            </div>
+
+            <div className="column">
+              <div className="jumbotron bg-transparent">
+                Price in ETH
+                <PriceETH address = { address } />
+              </div>
+            </div>
+          </div>
+        
+          
+
+        </div>
+        
+        
+        
+        
      </header>
     </div>
   );
