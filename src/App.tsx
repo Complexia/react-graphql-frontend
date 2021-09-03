@@ -74,6 +74,16 @@ const GET_PRICE_USD = gql`
   }
 `;
 
+const GET_EARLIEST_POOL = gql`
+  query GetEarliestPool($address: String!) {
+    getEarliestUniswapPool(address: $address)
+      
+
+    
+  }
+`;
+
+
 const TokenName = ({ address }) => {
   //let address = "0x514910771af9ca656af840dff83e8264ecf986ca";
   const { loading, error, data } = useQuery(GET_TOKEN_NAME, {
@@ -93,6 +103,22 @@ const TokenName = ({ address }) => {
 }
 
 const TotalSupply = ({ address }) => {
+  const { loading, error, data } = useQuery(GET_TOTAL_SUPPLY, {
+    variables: { address },
+  });
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+    return (
+      <div>
+  
+        { JSON.stringify(data) }
+      </div>
+    )
+}
+
+const EarliestPool = ({ address }) => {
   const { loading, error, data } = useQuery(GET_TOTAL_SUPPLY, {
     variables: { address },
   });
@@ -247,6 +273,14 @@ export default function App() {
                 <PriceETH address = { address } />
               </div>
             </div>
+
+            <div className="column">
+              <div className="jumbotron bg-transparent">
+                Earliest recorded pool
+                <EarliestPool address = { address } />
+              </div>
+            </div>
+
           </div>
         
           
