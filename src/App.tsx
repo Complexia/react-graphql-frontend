@@ -45,12 +45,18 @@ const GET_TOTAL_SUPPLY = gql`
 `;
 
 const GET_TXNS_HISTORY = gql`
-  query GetTxnsHistory($address: String!, $block: Int!) {
-    getTxnsList(address: $address, block: $block) {
+  query GetTxnsHistory($address: String, $fromBlock: Int, $toBlock: Int, $numberOfTxns: Int) {
+    getTxnsList(address: $address, fromBlock: $fromBlock, toBlock: $toBlock, numberOfTxns: $numberOfTxns) {
+      from
+      to
+      value
+      gasPaid
+      txnFeeEth
       txnHash
       blockNumber
-      topics
-    }
+    
+    
+  }
 
     
   }
@@ -58,7 +64,9 @@ const GET_TXNS_HISTORY = gql`
 
 const GET_PRICE_ETH = gql`
   query GetPriceETH($address: String!) {
-    getPriceETH(address: $address)
+    getPriceETH(address: $address) {
+      price
+    }
       
 
     
@@ -80,6 +88,47 @@ const GET_EARLIEST_POOL = gql`
       
 
     
+  }
+`;
+
+const GET_LIQUIDITY = gql`
+  query GetLiquidity($address: String!) {
+    getTotalLiquidity(address: $address)
+      
+
+    
+  }
+`;
+
+const GET_DAILY_VOLUME = gql`
+  query GetDailyVolume($poolAddress: String!, $version: String!) {
+    getDailyVolume(poolAddress: $poolAddress, version: $version) {
+      token0Name,
+      token0Volume,
+      token1Name,
+      token1Volume
+    }
+      
+
+    
+  }
+`;
+
+const GET_POPULAR_POOLS = gql`
+  query GetPopularPools($address: String) {
+
+    getPopularPools(address: $address) {
+      token0Name,
+      token1Name,
+      poolAddress
+    }
+  }
+`;
+
+const GET_TXNS_COUNT = gql`
+  query GetTxnsCount($address: String) {
+
+    getTxnsCount(address: $address)
   }
 `;
 
@@ -134,10 +183,10 @@ const EarliestPool = ({ address }) => {
     )
 }
 
-const TxnsHistory = ({ address, block }) => {
-  console.log(address, block);
+const TxnsHistory = ({ address, fromBlock, toBlock, numberOfTxns }) => {
+  
   const { loading, error, data } = useQuery(GET_TXNS_HISTORY, {
-    variables: { address, block },
+    variables: { address, fromBlock, toBlock, numberOfTxns },
   });
 
   if (loading) return <p>Loading...</p>;
@@ -185,6 +234,95 @@ const PriceUSD = ({ address }) => {
     )
 }
 
+const Liquidity = ({ address }) => {
+  
+  const { loading, error, data } = useQuery(GET_LIQUIDITY, {
+    variables: { address },
+  });
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+    return (
+      <div>
+  
+        { JSON.stringify(data) }
+      </div>
+    )
+}
+
+const PopularPools = ({ address }) => {
+  
+  const { loading, error, data } = useQuery(GET_POPULAR_POOLS, {
+    variables: { address },
+  });
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+    return (
+      <div>
+  
+        { JSON.stringify(data.getPopularPools) }
+       
+        
+      </div>
+    )
+}
+
+const DailyVolume = ({ poolAddress, version }) => {
+  
+  const { loading, error, data } = useQuery(GET_DAILY_VOLUME, {
+    variables: { poolAddress, version },
+  });
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+    return (
+      <div>
+  
+        { JSON.stringify(data) }
+      </div>
+    )
+}
+
+const ShowDailyVolume = ({ address }) => {
+  
+  const { loading, error, data } = useQuery(GET_POPULAR_POOLS, {
+    variables: { address },
+  });
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+    return (
+      <div>
+  
+        
+        <DailyVolume poolAddress = { data.getPopularPools[0].poolAddress } version = "V3" />
+      </div>
+    )
+}
+
+const TxnsCount = ({ address }) => {
+  
+  const { loading, error, data } = useQuery(GET_TXNS_COUNT, {
+    variables: { address },
+  });
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+    return (
+      <div>
+  
+        
+        { JSON.stringify(data) }
+      </div>
+    )
+}
+
 
 const ExchangeRates = () => {
 
@@ -195,6 +333,8 @@ const ExchangeRates = () => {
       <div>
 
         { JSON.stringify(data) }
+        
+
       </div>
     )
 }
@@ -221,7 +361,9 @@ export default function App() {
   //   fetchAPI();
     
   // }, []);
-  let block: number  = 20;
+  let fromBlock: number  = 13223622;
+  let toBlock: number = 13223642;
+  let minTxns: number = 40;
   return (
     <div className="App">
       <header className="App-header">
@@ -256,7 +398,7 @@ export default function App() {
             </div>
             <div className="column">
               <div className="jumbotron bg-transparent">
-                <TxnsHistory address = { address } block = { block } />
+                <TxnsHistory address = { address } fromBlock = { fromBlock } toBlock = { toBlock } numberOfTxns = { minTxns }/>
               </div>
             </div>
 
@@ -280,6 +422,36 @@ export default function App() {
                 <EarliestPool address = { address } />
               </div>
             </div>
+
+            <div className="column">
+              <div className="jumbotron bg-transparent">
+                Total Liquidity
+                <Liquidity address = { address } />
+              </div>
+            </div>
+
+            <div className="column">
+              <div className="jumbotron bg-transparent">
+                Popular Pools
+                <PopularPools address = { address } />
+              </div>
+            </div>
+
+            <div className="column">
+              <div className="jumbotron bg-transparent">
+                Daily Volume
+                <ShowDailyVolume address = { address } />
+              </div>
+            </div>
+
+            <div className="column">
+              <div className="jumbotron bg-transparent">
+                Txns Count
+                <TxnsCount address = { address } />
+              </div>
+            </div>
+
+            
 
           </div>
         
